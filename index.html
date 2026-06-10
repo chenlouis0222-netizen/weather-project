@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>台灣即時天氣查詢系統</title>
+  <title>🌤 即時天氣查詢系統</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -11,8 +11,9 @@
   <div class="card">
     <h1>🌤 即時天氣查詢系統</h1>
 
-    <input id="cityInput"
-      placeholder="輸入城市（例：台北市）"
+    <p class="subtitle">輸入城市或使用定位取得天氣</p>
+
+    <input id="cityInput" placeholder="例如：台北市 / 桃園市"
       onkeydown="if(event.key==='Enter') getWeather()">
 
     <div class="btn-group">

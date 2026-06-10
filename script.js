@@ -1,70 +1,55 @@
-const apiKey = "CWA-9D77C32A-9631-4FCF-8742-096A3875854B";
-
-/* 台灣城市修正 */
+// 🌍 城市 → 經緯度
 const cityMap = {
-  "台北市": "臺北市",
-  "臺北市": "臺北市",
-  "新北市": "新北市",
-  "桃園市": "桃園市",
-  "台中市": "臺中市",
-  "台南市": "臺南市",
-  "高雄市": "高雄市",
-  "基隆市": "基隆市",
-  "新竹市": "新竹市",
-  "嘉義市": "嘉義市"
+  "台北市": [25.03, 121.56],
+  "臺北市": [25.03, 121.56],
+  "桃園市": [24.99, 121.30],
+  "台中市": [24.15, 120.67],
+  "臺中市": [24.15, 120.67],
+  "台南市": [22.99, 120.20],
+  "高雄市": [22.63, 120.30]
 };
 
-/* 查天氣 */
+// 🌤 查天氣（Open-Meteo）
 async function getWeather(cityInput) {
 
-  const inputCity =
+  const city =
     cityInput ||
     document.getElementById("cityInput").value ||
     "臺北市";
 
-  const city = cityMap[inputCity] || "臺北市";
-
   document.getElementById("result").innerHTML = "⏳ 查詢中...";
 
+  const [lat, lon] = cityMap[city] || cityMap["臺北市"];
+
   const url =
-    `https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=${apiKey}&locationName=${city}`;
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
 
   try {
     const res = await fetch(url);
     const data = await res.json();
 
-    if (!data.records?.location?.length) {
-      document.getElementById("result").innerHTML = "❌ 查無城市資料";
-      return;
-    }
+    const w = data.current_weather;
 
-    const location = data.records.location[0];
-
-    const wx = location.weatherElement[0].time[0].parameter.parameterName;
-    const pop = location.weatherElement[1].time[0].parameter.parameterName;
-    const minT = location.weatherElement[2].time[0].parameter.parameterName;
-    const maxT = location.weatherElement[4].time[0].parameter.parameterName;
-
+    // ☀️ 簡單天氣判斷
     let icon = "☀️";
-    if (wx.includes("雨")) icon = "🌧️";
-    else if (wx.includes("陰") || wx.includes("雲")) icon = "☁️";
+    if (w.weathercode > 2) icon = "☁️";
+    if (w.weathercode > 45) icon = "🌧️";
 
     document.getElementById("result").innerHTML = `
       <h2>${city}</h2>
-      <div style="font-size:50px">${icon}</div>
-      <p>${wx}</p>
-      <p>🌡 ${minT}°C ~ ${maxT}°C</p>
-      <p>🌧 降雨機率：${pop}%</p>
+      <div style="font-size:55px">${icon}</div>
+      <p>🌡 溫度：${w.temperature} °C</p>
+      <p>💨 風速：${w.windspeed} km/h</p>
     `;
 
   } catch (err) {
-    console.error(err);
+    console.log(err);
     document.getElementById("result").innerHTML =
-      "❌ API錯誤或網路問題";
+      "❌ 天氣資料取得失敗";
   }
 }
 
-/* 📍 GPS → 自動轉城市 + 查天氣（完整修復版） */
+// 📍 GPS 定位（升級版）
 function getLocationWeather() {
 
   document.getElementById("result").innerHTML = "📍 定位中...";
@@ -74,33 +59,17 @@ function getLocationWeather() {
     return;
   }
 
-  navigator.geolocation.getCurrentPosition(async (pos) => {
+  navigator.geolocation.getCurrentPosition((pos) => {
 
     const lat = pos.coords.latitude;
     const lon = pos.coords.longitude;
 
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
-      );
-
-      const data = await res.json();
-
-      let city =
-        data.address.city ||
-        data.address.town ||
-        data.address.suburb ||
-        data.address.county ||
-        "臺北市";
-
-      document.getElementById("cityInput").value = city;
-
-      getWeather(city);
-
-    } catch (err) {
-      document.getElementById("result").innerHTML =
-        "📍 定位成功，但城市解析失敗";
-    }
+    document.getElementById("result").innerHTML = `
+      <h3>📍 已取得位置</h3>
+      <p>緯度：${lat.toFixed(2)}</p>
+      <p>經度：${lon.toFixed(2)}</p>
+      <p>👉 可直接輸入城市查詢天氣</p>
+    `;
 
   }, () => {
     document.getElementById("result").innerHTML =
