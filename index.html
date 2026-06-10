@@ -2,26 +2,24 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>🌤 即時天氣查詢系統</title>
+  <title>iOS 天氣 App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
   <div class="card">
-    <h1>🌤 即時天氣查詢系統</h1>
+    <h1>🌤 iOS Weather</h1>
 
-    <p class="subtitle">輸入城市或使用定位取得天氣</p>
-
-    <input id="cityInput" placeholder="例如：台北市 / 桃園市"
+    <input id="cityInput" placeholder="輸入城市（例：Tokyo / Taipei）"
       onkeydown="if(event.key==='Enter') getWeather()">
 
     <div class="btn-group">
       <button onclick="getWeather()">查詢天氣</button>
-      <button onclick="getLocationWeather()">📍 目前位置</button>
+      <button onclick="getLocationWeather()">📍 定位</button>
     </div>
 
-    <div id="result">請輸入城市或使用定位</div>
+    <div id="result">輸入城市開始查詢</div>
   </div>
 
   <script src="script.js"></script>
