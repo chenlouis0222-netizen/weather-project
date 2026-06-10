@@ -1,4 +1,4 @@
-const apiKey = "請填入你的中央氣象署API Key";
+const apiKey = "CWA-9D77C32A-9631-4FCF-8742-096A3875854B";
 
 /* 台灣城市修正 */
 const cityMap = {
