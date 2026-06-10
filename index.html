@@ -1,29 +1,29 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <title>iOS Weather</title>
+  <meta charset="UTF-8" />
+  <title>Weather App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="card">
+  <div class="card">
 
-  <h1>🌤 iOS Weather</h1>
+    <h1>🌤 Weather</h1>
 
-  <input id="cityInput" placeholder="輸入城市（例：Tokyo / Taipei）">
+    <input id="cityInput" placeholder="輸入城市 (Taipei / Tokyo / London)"
+      onkeydown="if(event.key==='Enter') getWeather()">
 
-  <div class="btn-group">
-    <button onclick="getWeather()">查詢天氣</button>
-    <button onclick="getLocationWeather()">📍 定位</button>
+    <div class="btn-group">
+      <button onclick="getWeather()">查詢</button>
+      <button onclick="getLocationWeather()">📍 定位</button>
+    </div>
+
+    <div id="result">請輸入城市</div>
+
   </div>
 
-  <div id="result">請輸入城市查詢</div>
-
-</div>
-
-<script src="script.js"></script>
-
+  <script src="script.js"></script>
 </body>
 </html>
