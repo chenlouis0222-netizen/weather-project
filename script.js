@@ -1,4 +1,7 @@
-/* 🌍 查城市 */
+let latCache = null;
+let lonCache = null;
+
+/* 🌍 查城市 → 經緯度 */
 async function getWeather(cityInput) {
 
   const city = cityInput || document.getElementById("cityInput").value;
@@ -11,12 +14,11 @@ async function getWeather(cityInput) {
   document.getElementById("result").innerHTML = "查詢中...";
 
   try {
-
-    const geo = await fetch(
+    const geoRes = await fetch(
       `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
     );
 
-    const geoData = await geo.json();
+    const geoData = await geoRes.json();
 
     if (!geoData.results || geoData.results.length === 0) {
       document.getElementById("result").innerHTML = "❌ 找不到城市";
@@ -24,18 +26,17 @@ async function getWeather(cityInput) {
     }
 
     const place = geoData.results[0];
-
     const lat = place.latitude;
     const lon = place.longitude;
 
-    getWeatherByLatLon(place.name, lat, lon);
+    await getWeatherByLatLon(place.name, lat, lon);
 
   } catch (err) {
     document.getElementById("result").innerHTML = "❌ 查詢失敗";
   }
 }
 
-/* 🌤 天氣 API */
+/* 🌤 用經緯度查天氣 */
 async function getWeatherByLatLon(name, lat, lon) {
 
   const url =
@@ -46,14 +47,12 @@ async function getWeatherByLatLon(name, lat, lon) {
 
   const w = data.current_weather;
 
-  setBackground(w.weathercode);
-
   const icon = getIcon(w.weathercode);
 
   document.getElementById("result").innerHTML = `
     <h2>${name}</h2>
 
-    <div class="weather-icon">${icon}</div>
+    <div style="font-size:50px">${icon}</div>
 
     <div style="font-size:28px;font-weight:600;">
       ${w.temperature}°C
@@ -63,29 +62,7 @@ async function getWeatherByLatLon(name, lat, lon) {
   `;
 }
 
-/* 🌈 背景控制 */
-function setBackground(code) {
-
-  const body = document.body;
-
-  if (code === 0) {
-    body.style.background = "linear-gradient(180deg,#56ccf2,#2f80ed)";
-  }
-  else if (code <= 3) {
-    body.style.background = "linear-gradient(180deg,#bdc3c7,#2c3e50)";
-  }
-  else if (code <= 67) {
-    body.style.background = "linear-gradient(180deg,#4b79a1,#283e51)";
-  }
-  else if (code <= 77) {
-    body.style.background = "linear-gradient(180deg,#e6dada,#274046)";
-  }
-  else {
-    body.style.background = "linear-gradient(180deg,#141e30,#243b55)";
-  }
-}
-
-/* 🌦 icon */
+/* 🌦 天氣圖示 */
 function getIcon(code) {
   if (code === 0) return "☀️";
   if (code <= 3) return "☁️";
@@ -121,9 +98,9 @@ function getLocationWeather() {
       data.address.city ||
       data.address.town ||
       data.address.county ||
-      "Taipei";
+      "Unknown";
 
-    getWeather(city);
+    await getWeatherByLatLon(city, lat, lon);
 
   }, () => {
     document.getElementById("result").innerHTML = "❌ 定位失敗";
