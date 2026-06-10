@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: "Noto Sans TC", Arial;
   background: linear-gradient(to bottom, #74ebd5, #ACB6E5);
   height: 100vh;
   display: flex;
@@ -11,18 +11,30 @@ body {
 .card {
   background: white;
   padding: 30px;
-  border-radius: 16px;
-  width: 300px;
+  border-radius: 18px;
+  width: 90%;
+  max-width: 420px;
   text-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.02);
 }
 
 input {
   width: 90%;
-  padding: 10px;
+  padding: 12px;
   margin: 10px 0;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #ccc;
+  outline: none;
+}
+
+input:focus {
+  border: 1px solid #4facfe;
+  box-shadow: 0 0 8px rgba(79,172,254,0.5);
 }
 
 .btn-group {
@@ -32,16 +44,20 @@ input {
 }
 
 button {
-  padding: 10px;
+  padding: 10px 14px;
   border: none;
-  border-radius: 8px;
-  background: #3498db;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
   color: white;
   cursor: pointer;
+  font-weight: bold;
+  transition: 0.25s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 button:hover {
-  background: #2980b9;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.2);
 }
 
 #result {

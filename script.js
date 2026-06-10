@@ -1,20 +1,44 @@
-const apiKey = "你的CWA_API_KEY";
+const apiKey = "請填入你的中央氣象署API Key";
 
-async function getWeather() {
-  const city = document.getElementById("cityInput").value || "臺北市";
+/* 台灣城市修正 */
+const cityMap = {
+  "台北市": "臺北市",
+  "臺北市": "臺北市",
+  "新北市": "新北市",
+  "桃園市": "桃園市",
+  "台中市": "臺中市",
+  "台南市": "臺南市",
+  "高雄市": "高雄市",
+  "基隆市": "基隆市",
+  "新竹市": "新竹市",
+  "嘉義市": "嘉義市"
+};
 
-  const url = `https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=${apiKey}&locationName=${city}`;
+/* 查天氣 */
+async function getWeather(cityInput) {
+
+  const inputCity =
+    cityInput ||
+    document.getElementById("cityInput").value ||
+    "臺北市";
+
+  const city = cityMap[inputCity] || "臺北市";
+
+  document.getElementById("result").innerHTML = "⏳ 查詢中...";
+
+  const url =
+    `https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=${apiKey}&locationName=${city}`;
 
   try {
     const res = await fetch(url);
     const data = await res.json();
 
-    const location = data.records.location[0];
-
-    if (!location) {
-      document.getElementById("result").innerHTML = "❌ 找不到城市資料";
+    if (!data.records?.location?.length) {
+      document.getElementById("result").innerHTML = "❌ 查無城市資料";
       return;
     }
+
+    const location = data.records.location[0];
 
     const wx = location.weatherElement[0].time[0].parameter.parameterName;
     const pop = location.weatherElement[1].time[0].parameter.parameterName;
@@ -34,23 +58,52 @@ async function getWeather() {
     `;
 
   } catch (err) {
-    document.getElementById("result").innerHTML = "❌ 取得天氣失敗";
+    console.error(err);
+    document.getElementById("result").innerHTML =
+      "❌ API錯誤或網路問題";
   }
 }
 
-// 📍 定位功能（加分）
+/* 📍 GPS → 自動轉城市 + 查天氣（完整修復版） */
 function getLocationWeather() {
+
+  document.getElementById("result").innerHTML = "📍 定位中...";
+
   if (!navigator.geolocation) {
     alert("不支援定位");
     return;
   }
 
-  navigator.geolocation.getCurrentPosition((pos) => {
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+
     const lat = pos.coords.latitude;
     const lon = pos.coords.longitude;
 
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+      );
+
+      const data = await res.json();
+
+      let city =
+        data.address.city ||
+        data.address.town ||
+        data.address.suburb ||
+        data.address.county ||
+        "臺北市";
+
+      document.getElementById("cityInput").value = city;
+
+      getWeather(city);
+
+    } catch (err) {
+      document.getElementById("result").innerHTML =
+        "📍 定位成功，但城市解析失敗";
+    }
+
+  }, () => {
     document.getElementById("result").innerHTML =
-      `📍 已取得位置：${lat.toFixed(2)}, ${lon.toFixed(2)}<br>
-      （進階功能：可再串氣象站API升級）`;
+      "❌ 無法取得定位";
   });
 }
