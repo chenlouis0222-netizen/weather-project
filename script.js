@@ -1,116 +1,95 @@
-function setIOSBackground(type) {
-  const body = document.body;
+async function getWeather(inputCity) {
 
-  if (type === "sun") {
-    body.style.background = "linear-gradient(180deg,#56ccf2,#2f80ed)";
+  let lat, lon, name;
+
+  const city = inputCity || document.getElementById("cityInput").value || "Taipei";
+
+  document.getElementById("result").innerHTML = "⏳ 載入中...";
+
+  // 🌍 地名轉座標（全球可用）
+  const geoRes = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1&language=zh`
+  );
+
+  const geoData = await geoRes.json();
+
+  if (!geoData.results) {
+    document.getElementById("result").innerHTML = "❌ 找不到城市";
+    return;
   }
-  if (type === "rain") {
-    body.style.background = "linear-gradient(180deg,#4b79a1,#283e51)";
-  }
-  if (type === "cloud") {
-    body.style.background = "linear-gradient(180deg,#bdc3c7,#2c3e50)";
-  }
-}
 
-/* 🌍 天氣主功能 */
-async function getWeather() {
+  lat = geoData.results[0].latitude;
+  lon = geoData.results[0].longitude;
+  name = geoData.results[0].name;
 
-  let city = document.getElementById("cityInput").value.trim();
-  if (!city) city = "Taipei";
+  // 🌦 天氣 API
+  const weatherRes = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}
+    &current_weather=true
+    &daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max
+    &timezone=auto`
+  );
 
-  document.getElementById("result").innerHTML = "⏳ 查詢中...";
+  const data = await weatherRes.json();
 
-  try {
-    // 📍 地理轉換
-    const geo = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
-    );
+  const w = data.current_weather;
+  const d = data.daily;
 
-    const geoData = await geo.json();
+  // icon
+  let icon = "☀️";
+  if (w.weathercode >= 45) icon = "☁️";
+  if (w.weathercode >= 51) icon = "🌧️";
 
-    if (!geoData.results) {
-      document.getElementById("result").innerHTML = "❌ 找不到城市";
-      return;
-    }
+  // 穿搭建議
+  let clothes = "短袖 👕";
+  if (w.temperature < 20) clothes = "薄外套 🧥";
+  if (w.temperature < 15) clothes = "厚外套 🧥🧥";
 
-    const { latitude, longitude, name, country } = geoData.results[0];
-
-    // 🌤 天氣API
-    const weatherRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=precipitation_probability`
-    );
-
-    const data = await weatherRes.json();
-
-    const w = data.current_weather;
-    const rain = data.hourly.precipitation_probability[0] || 0;
-
-    // ☀️ 判斷天氣
-    let icon = "☀️";
-    let text = "晴天";
-    let bg = "sun";
-
-    if (w.weathercode <= 3) {
-      icon = "🌤";
-      text = "多雲";
-      bg = "cloud";
-    }
-    if (w.weathercode >= 45) {
-      icon = "☁️";
-      text = "陰天";
-      bg = "cloud";
-    }
-    if (w.weathercode >= 61) {
-      icon = "🌧";
-      text = "下雨";
-      bg = "rain";
-    }
-
-    // 👕 穿搭
-    let clothes = "";
-    if (rain > 50) clothes = "🌂 建議帶雨傘";
-    else if (w.temperature > 28) clothes = "🩳 短袖即可";
-    else if (w.temperature > 20) clothes = "👕 薄長袖";
-    else clothes = "🧥 建議外套";
-
-    setIOSBackground(bg);
-
-    // 📱 UI
-    document.getElementById("result").innerHTML = `
-      <h2>${name}, ${country}</h2>
-
-      <div class="weather-icon">${icon}</div>
-
-      <div style="font-size:28px;font-weight:600;">
-        ${w.temperature}°C
+  // 7天
+  let forecastHTML = "";
+  for (let i = 0; i < 7; i++) {
+    forecastHTML += `
+      <div class="day">
+        <div>${d.time[i].slice(5)}</div>
+        <div>🌤</div>
+        <div>${d.temperature_2m_max[i]}°</div>
+        <div>${d.temperature_2m_min[i]}°</div>
       </div>
-
-      <p>${text}</p>
-
-      <hr>
-
-      🌧 降雨機率：${rain}%<br>
-      💨 風速：${w.windspeed} km/h<br>
-
-      <hr>
-
-      👕 ${clothes}
     `;
+  }
 
-  } catch (err) {
-    document.getElementById("result").innerHTML =
-      "❌ API錯誤";
+  document.getElementById("result").innerHTML = `
+    <h2>${name}</h2>
+
+    <div style="font-size:60px">${icon}</div>
+
+    <h2>${w.temperature}°C</h2>
+
+    <p>💨 風速：${w.windspeed} km/h</p>
+    <p>👕 建議：${clothes}</p>
+
+    <hr>
+
+    <div class="forecast">
+      ${forecastHTML}
+    </div>
+  `;
+
+  // 背景
+  if (w.weathercode >= 51) {
+    document.body.style.background = "linear-gradient(180deg,#4b79a1,#283e51)";
+  } else if (w.weathercode >= 45) {
+    document.body.style.background = "linear-gradient(180deg,#bdc3c7,#2c3e50)";
+  } else {
+    document.body.style.background = "linear-gradient(180deg,#4facfe,#00f2fe)";
   }
 }
 
-/* 📍 定位 */
+// 📍 定位（真正可查）
 function getLocationWeather() {
-  navigator.geolocation.getCurrentPosition((pos) => {
-    const lat = pos.coords.latitude;
-    const lon = pos.coords.longitude;
+  document.getElementById("result").innerHTML = "📍 定位中...";
 
-    document.getElementById("result").innerHTML =
-      `📍 位置：${lat.toFixed(2)}, ${lon.toFixed(2)}<br>
-      👉 請直接輸入城市查詢`;
+  navigator.geolocation.getCurrentPosition((pos) => {
+    getWeather(`${pos.coords.latitude},${pos.coords.longitude}`);
   });
 }
