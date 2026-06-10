@@ -1,21 +1,51 @@
 body {
-    font-family: Arial;
-    text-align: center;
-    padding: 50px;
-    background: #3498db;
-    color: white;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom, #74ebd5, #ACB6E5);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
 input {
-    padding: 10px;
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
 }
 
 button {
-    padding: 10px;
-    margin-left: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #3498db;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #2980b9;
 }
 
 #result {
-    margin-top: 30px;
-    font-size: 20px;
+  margin-top: 20px;
+  font-size: 16px;
+  line-height: 1.6;
 }

@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="zh">
 <head>
-    <title>智慧天氣查詢系統</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>天氣查詢系統</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <h1>智慧天氣查詢系統</h1>
+  <div class="card">
+    <h1>🌤 即時天氣查詢</h1>
 
-    <input type="text" id="city" placeholder="輸入城市">
+    <input id="cityInput" placeholder="輸入城市（例如 臺北市）">
 
-    <button onclick="getWeather()">
-        查詢天氣
-    </button>
+    <div class="btn-group">
+      <button onclick="getWeather()">查詢天氣</button>
+      <button onclick="getLocationWeather()">📍 目前位置</button>
+    </div>
 
-    <div id="result"></div>
+    <div id="result">請輸入城市或使用定位</div>
+  </div>
 
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 
 </body>
-
 </html>
